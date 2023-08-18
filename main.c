@@ -6,21 +6,22 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "lcd.h"
+#include "temp.h"
+#include "ultrasonic.h"
 
 
-#define SLAVE_ADDRESS 0x27
+#define SLAVE_ADDRESS 0x3
 
 void show_value(unsigned char value);
 
 void main(void)
 {
 
-    unsigned char s = 0x00;
 
-        char txt1[] = {"YSLAB"};
-        char txt2[] = {"TEMPERATURE"};
-        char txt3[] = {"HUMUDITY"};
-        char txt4[] = {"Set Temperature"};
+    uint16_t dist = 0;
+    char kiori[20];
+    char str[20];
+
 
     WDT_A_hold(WDT_A_BASE);
 
@@ -75,45 +76,25 @@ void main(void)
 
 
     LCD_init();
-
     LCD_clear_home();
 
-    LCD_goto(3, 0);
-    LCD_putstr(txt1);
-    LCD_goto(3, 1);
-    LCD_putstr(txt2);
+    UltrasonicInit(); //initialize ultrasonic module
 
-    __delay_cycles(4000);
-
-    LCD_clear_home();
-
-    for(s = 0; s < 13; s++)
-    {
-        LCD_goto((1 + s), 0);
-        LCD_putchar(txt3[s]);
-        __delay_cycles(1600);
-    }
-    for(s = 0; s < 10; s++)
-    {
-        LCD_goto((3 + s), 1);
-        LCD_putchar(txt4[s]);
-        __delay_cycles(600);
-    }
-    __delay_cycles(4000);
-
-    s = 0;
-    LCD_clear_home();
-
-    LCD_goto(3, 0);
-    LCD_putstr(txt1);
 
     while(1)
     {
-        show_value(s);
-        s++;
-        __delay_cycles(4000);
+        dist = UltrasonicGetDistance();
+        snprintf(kiori, sizeof(kiori), "Distanta: %d", dist);
+        sprintf(str,"%d",dist);
+        LCD_goto(1, 0);
+        LCD_putstr(kiori);
+        LCD_goto(1, 1);
+        LCD_putstr(str);
+
+        __delay_cycles(100);
     };
 }
+/*
 void show_value(unsigned char value)
 {
    unsigned char ch = 0x00;
@@ -130,6 +111,7 @@ void show_value(unsigned char value)
    LCD_goto(8, 1);
    LCD_putchar(ch);
 }
+*/
 
 
 
